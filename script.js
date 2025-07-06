@@ -308,8 +308,8 @@ document.getElementById('calculateBtn').addEventListener('click', async function
   document.getElementById('p2RecordIncrease').textContent = formatNumber(Math.round(dP2));
   document.getElementById('sharedRecordIncrease').textContent = formatNumber(Math.round(dP2));
 
-  document.getElementById('splitSharedBill').textContent = formatNumber(Math.round(sharedSplit)) + " MMK";
-  document.getElementById('totalSharedUsers').textContent = totalSharedUsers;
+  document.getElementById('splitSharedBill').textContent = toCurrency(sharedSplit);
+  document.getElementById('totalSharedUsers').textContent = formatNumber(totalSharedUsers);
 
   document.getElementById('p1ResultBill').textContent = toCurrency(resultP1);
   document.getElementById('p2ResultBill').textContent = toCurrency(resultP2);
