@@ -112,13 +112,14 @@ async function renderHistory() {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const id = btn.getAttribute('data-id');
-      if (confirm(t.delete + " record?")) {
+      const confirmed = await showConfirm(t.delete + " record?");
+      if (confirmed) {
         try {
           const { error } = await supabase.from('history').delete().eq('id', id);
           if (error) throw error;
           btn.closest('.accordion-item').remove();
         } catch (err) {
-          alert(t.delete + " failed: " + err.message);
+          showMessage(t.delete + " failed: " + err.message);
         }
       }
     });
@@ -220,11 +221,11 @@ document.getElementById('fillPreviousBtn').addEventListener('click', async () =>
       .single();
 
     if (error) {
-      alert('Failed to fetch previous record: ' + error.message);
+      showMessage('Failed to fetch previous record: ' + error.message);
       return;
     }
     if (!data) {
-      alert('No previous records found in the database.');
+      showMessage('No previous records found in the database.');
       return;
     }
 
@@ -233,7 +234,7 @@ document.getElementById('fillPreviousBtn').addEventListener('click', async () =>
     document.getElementById('previousPerson2Bill').value = data.person2_number ?? '';
     document.getElementById('previousSharedBill').value = data.shared_number ?? '';
   } catch (err) {
-    alert('Error fetching previous record: ' + err.message);
+    showMessage('Error fetching previous record: ' + err.message);
   }
 });
 
@@ -252,7 +253,7 @@ document.getElementById('calculateBtn').addEventListener('click', async function
     isNaN(p1Prev) || isNaN(p2Prev) || isNaN(sharedPrev) ||
     isNaN(total)
   ) {
-    alert("Please enter all fields with numeric values.");
+    showMessage("Please enter all fields with numeric values.");
     return;
   }
 
@@ -262,7 +263,7 @@ document.getElementById('calculateBtn').addEventListener('click', async function
 
   const totalUnits = dP1 + dP2 + dShared;
   if (totalUnits <= 0) {
-    alert("Invalid input: Total unit usage must be more than 0.");
+    showMessage("Invalid input: Total unit usage must be more than 0.");
     return;
   }
 
@@ -315,7 +316,7 @@ document.getElementById('calculateBtn').addEventListener('click', async function
     ]);
     if (error) throw error;
   } catch (err) {
-    alert('Failed to save history: ' + err.message);
+    showMessage('Failed to save history: ' + err.message);
   }
 });
 
@@ -325,6 +326,45 @@ navCalculator.addEventListener('click', () => {
   calculatorSection.style.display = 'block';
   historySection.style.display = 'none';
 });
+
+function showConfirm(message) {
+  return new Promise((resolve) => {
+    const modalEl = document.getElementById('confirmModal');
+    const modalBody = document.getElementById('confirmModalBody');
+    const confirmOkBtn = document.getElementById('confirmOkBtn');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+
+    modalBody.textContent = message;
+
+    const modal = new bootstrap.Modal(modalEl);
+
+    // Cleanup handlers to avoid duplicate calls
+    function cleanup() {
+      confirmOkBtn.removeEventListener('click', onOk);
+      confirmCancelBtn.removeEventListener('click', onCancel);
+      modalEl.removeEventListener('hidden.bs.modal', onCancel);
+    }
+
+    function onOk() {
+      cleanup();
+      resolve(true);
+      modal.hide();
+    }
+
+    function onCancel() {
+      cleanup();
+      resolve(false);
+    }
+
+    confirmOkBtn.addEventListener('click', onOk);
+    confirmCancelBtn.addEventListener('click', onCancel);
+
+    // If user closes modal by clicking outside or pressing ESC
+    modalEl.addEventListener('hidden.bs.modal', onCancel, { once: true });
+
+    modal.show();
+  });
+}
 
 function formatNumber(value) {
   const formatted = Math.round(value).toLocaleString(); // localized with commas, etc.

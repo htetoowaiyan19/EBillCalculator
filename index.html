@@ -11,6 +11,7 @@
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="style.css" />
+  </style>
 </head>
 <body>
 <nav class="navbar fixed-top bg-light border-bottom shadow-sm px-3" id="mainNavbar">
@@ -33,6 +34,25 @@
     </div>
   </div>
 </nav>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" for="confirm" id="confirmModalLabel">Confirm</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="confirmModalBody">
+        <!-- Confirmation message goes here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="confirmCancelBtn" data-bs-dismiss="modal">No</button>
+        <button type="button" class="btn btn-primary" id="confirmOkBtn">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="container py-4">
   <div class="text-center mb-4">
@@ -69,8 +89,6 @@
       </button>
     </div>
 
-
-    <div class="form-title" for="prevMonthReadings"id="previousMonthTitle"><i class="bi bi-clock-history"></i> Previous Month Readings</div>
     <div class="mb-3">
       <label class="form-label" for="previousPerson1Bill" id="labelPrevPerson1"><i class="bi bi-person-fill"></i> Person 1</label>
       <input type="number" class="form-control input-hover" id="previousPerson1Bill" placeholder="e.g., 180" />
@@ -135,8 +153,54 @@
   </div>
 </div>
 
+<!-- Bootstrap modal for messages -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="messageModalLabel">Notice</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="messageModalBody">
+        <!-- message goes here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Modal helper
+  function showMessage(message, title = 'Notice') {
+    const modalEl = document.getElementById('messageModal');
+    const modalTitle = modalEl.querySelector('.modal-title');
+    const modalBody = document.getElementById('messageModalBody');
+
+    modalTitle.textContent = title;
+    modalBody.textContent = message;
+
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  }
+
+  // Example: Replace all alert() in your script with showMessage()
+  // Your existing script.js code here but replace alert('text') => showMessage('text')
+
+  // Theme toggle example
+  const themeToggle = document.getElementById('themeToggle');
+  themeToggle.addEventListener('change', () => {
+    document.body.classList.toggle('dark-theme', themeToggle.checked);
+  });
+
+  // You can add your existing logic below,
+  // and wherever you had alert('some text') use showMessage('some text')
+</script>
+
 <script type="module" src="script.js"></script>
 <script type="module" src="translation.js"></script>
 </body>

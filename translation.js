@@ -24,6 +24,7 @@ export const translations = {
     loadingRecords: "Loading records...",
     noRecords: "No records yet.",
     delete: "Delete",
+    confirm: "Confirm",
     currency: "MMK",
     lang: "EN",
   },
@@ -52,6 +53,7 @@ export const translations = {
     loadingRecords: "မှတ်တမ်းများကိုဖတ်နေသည်...",
     noRecords: "မှတ်တမ်းမရှိပါ။",
     delete: "ဖျက်မည်",
+    confirm: "သေချာပါသလား",
     currency: "ကျပ်",
     lang: "မြန်မာ",
   }
