@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Electricity Bill Splitter</title>
+
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<nav class="navbar fixed-top bg-light border-bottom shadow-sm px-3" id="mainNavbar">
+  <div class="container-fluid justify-content-between align-items-center">
+    <div class="d-flex gap-3">
+      <button class="btn nav-tab active" id="navCalculator"><i class="bi bi-lightning"></i> <span id="textCalculator">Calculator</span></button>
+      <button class="btn nav-tab" id="navHistory"><i class="bi bi-clock-history"></i> <span id="textHistory">History</span></button>
+    </div>
+
+    <div class="d-flex gap-2 align-items-center">
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="langToggle" />
+        <label class="form-check-label small" for="langToggle"><i class="bi bi-translate"></i> <span id="langLabel">EN</span></label>
+      </div>
+
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="themeToggle" />
+        <label class="form-check-label small" for="themeToggle"><i class="bi bi-moon-stars-fill"></i></label>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <div class="text-center mb-4">
+    <i class="bi bi-lightning-charge-fill text-warning" style="font-size: 2rem;"></i>
+    <div class="header-title" id="headerTitle">Electricity Bill Splitter</div>
+    <p class="text-muted mb-0" id="subHeaderText">Calculate and split your monthly usage fairly</p>
+  </div>
+
+  <!-- Current Month -->
+  <div class="form-section current-section">
+    <div class="form-title" for="currentMonthReadings" id="currentMonthTitle"><i class="bi bi-calendar2-week-fill"></i> Current Month Readings</div>
+    <div class="mb-3">
+      <label class="form-label" for="person1Bill" id="labelPerson1"><i class="bi bi-person-fill"></i> Person 1</label>
+      <input type="number" class="form-control input-hover" id="person1Bill" placeholder="e.g., 220" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="person2Bill" id="labelPerson2"><i class="bi bi-person-fill"></i> Person 2</label>
+      <input type="number" class="form-control input-hover" id="person2Bill" placeholder="e.g., 200" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="sharedBill" id="labelShared"><i class="bi bi-people-fill"></i> Shared Meter</label>
+      <input type="number" class="form-control input-hover" id="sharedBill" placeholder="e.g., 150" />
+    </div>
+  </div>
+
+  <!-- Previous Month -->
+  <div class="form-section previous-section position-relative">
+    <button id="fillPreviousBtn" class="btn btn-sm btn-outline-primary position-absolute top-0 end-0 m-2" type="button">
+      <i class="bi bi-arrow-clockwise"></i> <span id="btnFillPrevious">Fill Previous</span>
+    </button>
+
+    <div class="form-title" for="prevMonthReadings"id="previousMonthTitle"><i class="bi bi-clock-history"></i> Previous Month Readings</div>
+    <div class="mb-3">
+      <label class="form-label" for="previousPerson1Bill" id="labelPrevPerson1"><i class="bi bi-person-fill"></i> Person 1</label>
+      <input type="number" class="form-control input-hover" id="previousPerson1Bill" placeholder="e.g., 180" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="previousPerson2Bill" id="labelPrevPerson2"><i class="bi bi-person-fill"></i> Person 2</label>
+      <input type="number" class="form-control input-hover" id="previousPerson2Bill" placeholder="e.g., 170" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="previousSharedBill" id="labelPrevShared"><i class="bi bi-people-fill"></i> Shared Meter</label>
+      <input type="number" class="form-control input-hover" id="previousSharedBill" placeholder="e.g., 120" />
+    </div>
+  </div>
+
+  <!-- Total Bill -->
+  <div class="form-section bill-section">
+    <div class="form-title" for="totalBillHeader" id="totalBillTitle"><i class="bi bi-cash-coin"></i> Total Bill</div>
+    <div class="mb-3">
+      <label class="form-label" for="totalBill" id="labelTotal"><i class="bi bi-receipt"></i> Electricity Bill (Total)</label>
+      <input type="number" class="form-control input-hover" id="totalBill" placeholder="e.g., 80000 MMK" />
+    </div>
+  </div>
+
+  <!-- Calculate Button -->
+  <div class="text-center mb-3">
+    <button id="calculateBtn" class="btn btn-primary btn-hover">
+      <i class="bi bi-calculator-fill"></i> <span id="btnCalculate">Calculate</span>
+    </button>
+  </div>
+
+  <!-- Results -->
+  <div id="results" class="result-box" style="display:none;">
+    <h5><i class="bi bi-bar-chart-fill me-1"></i> <span id="resultsTitle">Results</span></h5>
+
+    <div class="row">
+      <div class="col-12 col-md-6 mb-3">
+        <h6 id="resultsCurrentTitle">Current Readings</h6>
+        <p><span id="labelP1">Person 1:</span> <span id="p1Record">--</span></p>
+        <p><span id="labelP2">Person 2:</span> <span id="p2Record">--</span></p>
+        <p><span id="labelSharedRecord">Shared:</span> <span id="sharedRecord">--</span></p>
+      </div>
+
+      <div class="col-12 col-md-6 mb-3">
+        <h6 id="resultsIncreaseTitle">Increase from Previous</h6>
+        <p><span id="labelP1Increase">Person 1 Increase:</span> <span id="p1RecordIncrease">--</span></p>
+        <p><span id="labelP2Increase">Person 2 Increase:</span> <span id="p2RecordIncrease">--</span></p>
+        <p><span id="labelSharedIncrease">Shared Increase:</span> <span id="sharedRecordIncrease">--</span></p>
+      </div>
+    </div>
+
+    <p><span id="resultsSplitLabel">Split Shared Bill:</span> <span id="splitSharedBill">--</span></p>
+    <p><span id="resultsUsersLabel">Total Shared Users:</span> <span id="totalSharedUsers">3</span></p>
+
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <h6 id="resultsFinalTitle">Final Bills</h6>
+        <p><span id="labelFinalP1">Person 1:</span> <span id="p1ResultBill">--</span></p>
+        <p><span id="labelFinalP2">Person 2:</span> <span id="p2ResultBill">--</span></p>
+        <p><span id="labelFinalTotal">Total Bill:</span> <span id="totalResultBill">--</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="script.js"></script>
+<script type="module" src="translation.js"></script>
+</body>
+</html>
