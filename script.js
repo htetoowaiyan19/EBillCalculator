@@ -161,35 +161,54 @@ langToggle.addEventListener('change', () => {
 function applyTranslations() {
   const t = translations[currentLang];
 
-  document.getElementById('navCalculator').innerHTML = `<i class="bi bi-lightning"></i> ${t.calculator}`;
-  document.getElementById('navHistory').innerHTML = `<i class="bi bi-clock-history"></i> ${t.history}`;
-  document.querySelector('.header-title').textContent = "Electricity Bill Splitter";
+  // Nav buttons
+  document.getElementById('navCalculator').innerHTML = `<i class="bi bi-lightning"></i> <span id="textCalculator">${t.calculator}</span>`;
+  document.getElementById('navHistory').innerHTML = `<i class="bi bi-clock-history"></i> <span id="textHistory">${t.history}</span>`;
 
-  if (historySection.style.display === 'block') {
-    renderHistory();
-  }
+  // Main header and subheader
+  document.getElementById('headerTitle').textContent = t.appTitle || "Electricity Bill Splitter";
+  document.getElementById('subHeaderText').textContent = t.appSubtitle || "Calculate and split your monthly usage fairly";
 
-  // Labels
-  document.querySelector('[for="currentMonthReadings"]').innerHTML = `<i class="bi bi-person-fill"></i> ${t.currentMonthReadings}`;
-  document.querySelector('[for="prevMonthReadings"]').innerHTML = `<i class="bi bi-person-fill"></i> ${t.prevMonthReadings}`;
-  document.querySelector('[for="person1Bill"]').innerHTML = `<i class="bi bi-person-fill"></i> ${t.person1}`;
-  document.querySelector('[for="person2Bill"]').innerHTML = `<i class="bi bi-person-fill"></i> ${t.person2}`;
-  document.querySelector('[for="sharedBill"]').innerHTML = `<i class="bi bi-people-fill"></i> ${t.sharedMeter}`;
-  document.querySelector('[for="previousPerson1Bill"]').innerHTML = `<i class="bi bi-person-fill"></i> ${t.person1}`;
-  document.querySelector('[for="previousPerson2Bill"]').innerHTML = `<i class="bi bi-person-fill"></i> ${t.person2}`;
-  document.querySelector('[for="previousSharedBill"]').innerHTML = `<i class="bi bi-people-fill"></i> ${t.sharedMeter}`;
-  document.querySelector('[for="totalBillHeader"]').innerHTML = `<i class="bi bi-receipt"></i> ${t.totalBill}`;
-  document.querySelector('[for="totalBill"]').innerHTML = `<i class="bi bi-receipt"></i> ${t.totalBill}`;
-  document.getElementById('calculateBtn').innerHTML = `<i class="bi bi-calculator-fill"></i> ${t.calculate}`;
-  document.getElementById('fillPreviousBtn').innerHTML = `<i class="bi bi-arrow-clockwise"></i> ${t.fillPrevious}`;
+  // Section Titles (your div.form-title with IDs)
+  document.getElementById('currentMonthTitle').innerHTML = `<i class="bi bi-calendar2-week-fill"></i> ${t.currentMonthReadings}`;
+  document.getElementById('previousMonthTitle').innerHTML = `<i class="bi bi-clock-history"></i> ${t.prevMonthReadings}`;
+  document.getElementById('totalBillTitle').innerHTML = `<i class="bi bi-cash-coin"></i> ${t.totalBill}`;
 
-  // Results section (if visible)
-  document.querySelector('#results h5').innerHTML = `<i class="bi bi-bar-chart-fill me-1"></i> ${t.results}`;
-  document.querySelector('#results .col-md-6:nth-child(1) h6').textContent = t.current;
-  document.querySelector('#results .col-md-6:nth-child(2) h6').textContent = t.increase;
-  document.querySelector('#splitSharedBill').previousSibling.textContent = `${t.sharedSplit}: `;
-  document.querySelector('#totalSharedUsers').previousSibling.textContent = `${t.totalSharedUsers}: `;
-  document.querySelector('#results .col-md-6:last-child h6').textContent = t.finalBills;
+  // Input Labels
+  document.getElementById('labelPerson1').innerHTML = `<i class="bi bi-person-fill"></i> ${t.person1}`;
+  document.getElementById('labelPerson2').innerHTML = `<i class="bi bi-person-fill"></i> ${t.person2}`;
+  document.getElementById('labelShared').innerHTML = `<i class="bi bi-people-fill"></i> ${t.sharedMeter}`;
+
+  document.getElementById('labelPrevPerson1').innerHTML = `<i class="bi bi-person-fill"></i> ${t.person1}`;
+  document.getElementById('labelPrevPerson2').innerHTML = `<i class="bi bi-person-fill"></i> ${t.person2}`;
+  document.getElementById('labelPrevShared').innerHTML = `<i class="bi bi-people-fill"></i> ${t.sharedMeter}`;
+
+  document.getElementById('labelTotal').innerHTML = `<i class="bi bi-receipt"></i> ${t.totalBill}`;
+
+  // Buttons
+  document.getElementById('btnCalculate').innerHTML = `<i class="bi"></i> ${t.calculate}`;
+  document.getElementById('btnFillPrevious').innerHTML = `<i class="bi"></i> ${t.fillPrevious}`;
+
+  // Results section titles and labels
+  document.getElementById('resultsTitle').innerHTML = `<i class="bi bi-bar-chart-fill me-1"></i> ${t.results}`;
+  document.getElementById('resultsCurrentTitle').textContent = t.current;
+  document.getElementById('resultsIncreaseTitle').textContent = t.increase;
+
+  document.getElementById('labelP1').textContent = `${t.person1}:`;
+  document.getElementById('labelP2').textContent = `${t.person2}:`;
+  document.getElementById('labelSharedRecord').textContent = `${t.sharedMeter}:`;
+
+  document.getElementById('labelP1Increase').textContent = `${t.person1} ${t.increase}:`;
+  document.getElementById('labelP2Increase').textContent = `${t.person2} ${t.increase}:`;
+  document.getElementById('labelSharedIncrease').textContent = `${t.sharedMeter} ${t.increase}:`;
+
+  document.getElementById('resultsSplitLabel').textContent = `${t.sharedSplit}:`;
+  document.getElementById('resultsUsersLabel').textContent = `${t.totalSharedUsers}:`;
+
+  document.getElementById('resultsFinalTitle').textContent = t.finalBills;
+  document.getElementById('labelFinalP1').textContent = `${t.person1}:`;
+  document.getElementById('labelFinalP2').textContent = `${t.person2}:`;
+  document.getElementById('labelFinalTotal').textContent = `${t.totalBill}:`;
 }
 
 // Apply theme from localStorage on load
