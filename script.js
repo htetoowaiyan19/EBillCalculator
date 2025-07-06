@@ -306,7 +306,7 @@ document.getElementById('calculateBtn').addEventListener('click', async function
 
   document.getElementById('p1RecordIncrease').textContent = formatNumber(Math.round(dP1));
   document.getElementById('p2RecordIncrease').textContent = formatNumber(Math.round(dP2));
-  document.getElementById('sharedRecordIncrease').textContent = formatNumber(Math.round(dP2));
+  document.getElementById('sharedRecordIncrease').textContent = formatNumber(Math.round(dShared));
 
   document.getElementById('splitSharedBill').textContent = toCurrency(sharedSplit);
   document.getElementById('totalSharedUsers').textContent = formatNumber(totalSharedUsers);
