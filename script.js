@@ -190,7 +190,7 @@ function applyTranslations() {
   document.getElementById('btnFillPrevious').innerHTML = `<i class="bi"></i> ${t.fillPrevious}`;
 
   // Results section titles and labels
-  document.getElementById('resultsTitle').innerHTML = `<i class="bi bi-bar-chart-fill me-1"></i> ${t.results}`;
+  document.getElementById('resultsTitle').innerHTML = `<i class="bi me-1"></i> ${t.results}`;
   document.getElementById('resultsCurrentTitle').textContent = t.current;
   document.getElementById('resultsIncreaseTitle').textContent = t.increase;
 
