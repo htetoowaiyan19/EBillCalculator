@@ -225,6 +225,28 @@ input::placeholder {
   color: #333;
 }
 
+.accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem; /* space between text and button */
+  flex-wrap: nowrap;
+}
+
+.accordion-button {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.delete-record-btn {
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+  min-width: 32px;
+  height: 32px;
+}
+
 /* ===== Dark Theme ===== */
 body.dark-theme {
   background: #1f1f1f;
