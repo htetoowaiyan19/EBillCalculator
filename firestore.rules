@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // history: allow create only when the new document's uid equals authenticated uid
+    // allow read/update/delete only for documents owned by the authenticated user
+    match /history/{docId} {
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow read, update, delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
+    // previous: doc id == userId; allow only that user to read/write
+    match /previous/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

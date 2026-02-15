@@ -1,0 +1,47 @@
+I want to make this calculator fully modular by using own scripting if possible. If the following example hard, we don't have to do it. The following is a current default operation:
+
+CORE.SETUP:
+CORE.SET(FIELD1).KEY('cmonth').NAME('Current Month Readings'),
+FIELD1.SET(INPUT1).KEY('c1Unit').NAME('Person 1 Unit'),
+FIELD1.SET(INPUT2).KEY('c2Unit').NAME('Person 2 Unit'),
+FIELD1.SET(INPUT3).KEY('cShared').NAME('Shared Meter)|
+CORE.SET(FIELD2).KEY('pmonth').NAME('Previous Month Readings').SAVEABLE,
+FIELD1.SET(INPUT1).KEY('p1Unit').NAME('Person 1 Unit'),
+FIELD1.SET(INPUT2).KEY('p2Unit').NAME('Person 2 Unit'),
+FIELD1.SET(INPUT3).KEY('pShared').NAME('Shared Meter)|
+CORE.SET(FIELD3).KEY('tBillField').NAME('Total Bill'),
+FIELD1.SET(INPUT1).KEY('tBill').NAME('Total Bill')|
+
+CORE.COMPUTE:
+VAR.CREATE('dp1')=c1Unit-p1Unit|
+VAR.CREATE('dp2')=c2Unit-p2Unit|
+VAR.CREATE('dShared')=cShared-pShared|
+VAR.CREATE('multiplier')=tBill/(dp1+dp2+dShared)|
+VAR.CREATE('finalP1')=dp1*multiplier|
+VAR.CREATE('finalP2')=dp2*multiplier|
+VAR.CREATE('finalShared')=dShared*multiplier|
+VAR.CREATE('sharedSplit')=finalShared/3|
+VAR.CREATE('resultP1')=finalP1+sharedSplit|
+VAR.CREATE('resultP2')=finalP2.sharedSplit|
+VAR.CREATE('resultTotal')=resultP1+resultP2+sharedSplit|
+
+CORE.OUTPUT:
+OUT('p1').AS('Person 1 Unit')|
+OUT('p2').AS('Person 2 Unit')| etc...
+
+Brief Explaination:
+CORE.SETUP - Setup fields
+CORE.COMPUTE - Compute script
+CORE.OUTPUT - Output result
+
+The key '|' indicates the end of operation or syntax like ';' in programming
+
+Additional Attributes for setups:
+FIELD1.SET(INPUT1).KEY('c1Unit').NAME('Person 1 Unit').MIN(1).MAX(9000)|
+.MIN indicates minimum value while .MAX indicates maximium value
+.SAVEABLE will save all value inside the field in the database and adds a button to fill previous as set in 'Previous Month Record'
+
+If possible and not complex, write the documentation guide of this script inside README.md. You may add any keywords for new feature you can think of.
+
+If not possible, you may leave the project as current.
+

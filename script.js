@@ -1,10 +1,315 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { translations } from './translation.js';
 
-const supabase = createClient(
-  'https://nnnstupxmcatpvlywlmg.supabase.co', // Your Supabase URL
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ubnN0dXB4bWNhdHB2bHl3bG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA1NDAsImV4cCI6MjA2NzM5NjU0MH0.vrt_QvYqVYXy0JCJjmODAkbhM5H-50chXcZdWuIDr7k' // Your anon public key
-);
+// Firestore (replace Supabase)
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
+  deleteDoc,
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp
+} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+
+// Firebase (client-side) - Auth (Email + Google)
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
+import { getAnalytics } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js';
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect
+} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBNEMiRnB7ooAq7jrEtHD8GUHnqfGVtHeA",
+  authDomain: "ebillcalculator.firebaseapp.com",
+  projectId: "ebillcalculator",
+  storageBucket: "ebillcalculator.firebasestorage.app",
+  messagingSenderId: "317646790991",
+  appId: "1:317646790991:web:8255692e397007398f253a",
+  measurementId: "G-3Z51TJJSBX"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+try { getAnalytics(firebaseApp); } catch(e) { /* analytics only works on https / supported env */ }
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
+
+// Firestore helpers
+async function saveHistoryForUser(user, record) {
+  if (!user) throw new Error('Not authenticated');
+  try {
+    const payload = {
+      uid: user.uid,
+      person1_number: record.person1_number,
+      person2_number: record.person2_number,
+      shared_number: record.shared_number,
+      previous_person1_number: record.previous_person1_number,
+      previous_person2_number: record.previous_person2_number,
+      previous_shared_number: record.previous_shared_number,
+      total_bill: record.total_bill,
+      result_person1: record.result_person1,
+      result_person2: record.result_person2,
+      result_total: record.result_total,
+      createdAt: serverTimestamp()
+    };
+    const ref = await addDoc(collection(db, 'history'), payload);
+    return ref.id;
+  } catch (err) {
+    throw new Error('Firestore write failed — make sure Firestore is created and rules allow authenticated writes (region: asia-southeast1).\n' + (err.message || err));
+  }
+}
+
+async function updatePreviousForUser(user, prev) {
+  if (!user) throw new Error('Not authenticated');
+  try {
+    const ref = doc(db, 'previous', user.uid);
+    await setDoc(ref, {
+      person1_number: prev.person1_number,
+      person2_number: prev.person2_number,
+      shared_number: prev.shared_number,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  } catch (err) {
+    throw new Error('Failed to update previous-month snapshot in Firestore — ensure Firestore exists and rules allow writes (region: asia-southeast1).\n' + (err.message || err));
+  }
+}
+
+async function getPreviousForUser(user) {
+  if (!user) return null;
+  try {
+    const ref = doc(db, 'previous', user.uid);
+    const snap = await getDoc(ref);
+    return snap.exists() ? snap.data() : null;
+  } catch (err) {
+    throw new Error('Failed to read previous-month from Firestore — make sure Firestore is created (region: asia-southeast1).\n' + (err.message || err));
+  }
+}
+
+async function fetchUserHistory(user, limitCount = 20) {
+  if (!user) return [];
+  try {
+    const q = query(
+      collection(db, 'history'),
+      where('uid', '==', user.uid),
+      orderBy('createdAt', 'desc'),
+      limit(limitCount)
+    );
+    const snaps = await getDocs(q);
+    return snaps.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    throw new Error('Failed to read user history from Firestore — make sure Firestore is created and rules allow reads (region: asia-southeast1).\n' + (err.message || err));
+  }
+}
+
+async function deleteHistoryById(id) {
+  try {
+    await deleteDoc(doc(db, 'history', id));
+  } catch (err) {
+    throw new Error('Failed to delete history record from Firestore.\n' + (err.message || err));
+  }
+}
+
+// Update auth UI when state changes
+function updateAuthUI(user) {
+  const openAuthBtn = document.getElementById('openAuthBtn');
+  const userBtn = document.getElementById('userBtn');
+  const userEmailSpan = document.getElementById('userEmail');
+  const userPhotoImg = document.getElementById('userPhoto');
+  if (!openAuthBtn || !userBtn) return;
+
+  if (user) {
+    openAuthBtn.style.display = 'none';
+    userBtn.style.display = 'flex';
+    userEmailSpan.textContent = user.email || user.displayName || '';
+    userPhotoImg.src = user.photoURL || 'https://via.placeholder.com/28?text=U';
+  } else {
+    openAuthBtn.style.display = 'inline-block';
+    userBtn.style.display = 'none';
+    userEmailSpan.textContent = '';
+    userPhotoImg.src = 'https://via.placeholder.com/28?text=U';
+  }
+}
+
+onAuthStateChanged(auth, (user) => {
+  updateAuthUI(user);
+  const profileName = document.getElementById('profileName');
+  const profileEmail = document.getElementById('profileEmail');
+  const profilePhoto = document.getElementById('profilePhoto');
+  if (user) {
+    if (profileName) profileName.textContent = user.displayName || user.email || '';
+    if (profileEmail) profileEmail.textContent = user.email || '';
+    if (profilePhoto) profilePhoto.src = user.photoURL || 'https://via.placeholder.com/80?text=U';
+  } else {
+    if (profileName) profileName.textContent = '';
+    if (profileEmail) profileEmail.textContent = '';
+    if (profilePhoto) profilePhoto.src = 'https://via.placeholder.com/80?text=U';
+  }
+
+  // enable/disable UI parts that require authentication
+  const fillBtn = document.getElementById('fillPreviousBtn');
+  if (fillBtn) fillBtn.disabled = !user;
+
+  // update mobile area if available
+  if (typeof updateMobileUser === 'function') {
+    try { updateMobileUser(user); } catch(e) { /* ignore */ }
+  }
+
+  // If user state changes and the History tab is visible, refresh it (user-specific)
+  if (typeof historySection !== 'undefined' && historySection.style.display === 'block') {
+    // Refresh history view when the user signs in/out
+    try { renderHistory(); } catch (e) { /* ignore */ }
+  }
+});
+
+// Wire up auth UI handlers once DOM is ready
+window.addEventListener('DOMContentLoaded', () => {
+  const openAuthBtn = document.getElementById('openAuthBtn');
+  const userBtn = document.getElementById('userBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const googleSignInBtn = document.getElementById('googleSignInBtn');
+
+  if (openAuthBtn) {
+    openAuthBtn.addEventListener('click', () => new bootstrap.Modal(document.getElementById('authModal')).show());
+  }
+  if (userBtn) {
+    userBtn.addEventListener('click', () => new bootstrap.Modal(document.getElementById('accountModal')).show());
+  }
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        const accountModalEl = document.getElementById('accountModal');
+        bootstrap.Modal.getInstance(accountModalEl)?.hide();
+        showMessage('Signed out', 'Account');
+      } catch (err) {
+        showMessage(err.message || 'Sign-out failed');
+      }
+    });
+  }
+
+  // Mobile / side-menu bindings
+  const mobileOpenAuthBtn = document.getElementById('mobileOpenAuthBtn');
+  const mobileAccountBtn = document.getElementById('mobileAccountBtn');
+  const mobileUserInfo = document.getElementById('mobileUserInfo');
+  const mobileUserPhoto = document.getElementById('mobileUserPhoto');
+  const mobileUserName = document.getElementById('mobileUserName');
+  const mobileUserEmail = document.getElementById('mobileUserEmail');
+
+  if (mobileOpenAuthBtn) {
+    mobileOpenAuthBtn.addEventListener('click', () => {
+      new bootstrap.Offcanvas(document.getElementById('sideMenu')).hide();
+      new bootstrap.Modal(document.getElementById('authModal')).show();
+    });
+  }
+  if (mobileAccountBtn) {
+    mobileAccountBtn.addEventListener('click', () => {
+      new bootstrap.Offcanvas(document.getElementById('sideMenu')).hide();
+      new bootstrap.Modal(document.getElementById('accountModal')).show();
+    });
+  }
+
+  // mobile nav buttons
+  const mNavCalc = document.getElementById('mobileNavCalculator');
+  const mNavHist = document.getElementById('mobileNavHistory');
+  if (mNavCalc) mNavCalc.addEventListener('click', () => { new bootstrap.Offcanvas(document.getElementById('sideMenu')).hide(); navCalculator.click(); });
+  if (mNavHist) mNavHist.addEventListener('click', () => { new bootstrap.Offcanvas(document.getElementById('sideMenu')).hide(); navHistory.click(); });
+
+  // update mobile user area when auth changes
+  function updateMobileUser(user) {
+    if (!mobileUserInfo) return;
+    if (user) {
+      mobileUserInfo.style.display = 'flex';
+      mobileUserPhoto.src = user.photoURL || 'https://via.placeholder.com/40?text=U';
+      mobileUserName.textContent = user.displayName || user.email || '';
+      mobileUserEmail.textContent = user.email || '';
+      mobileAccountBtn.style.display = 'inline-block';
+      mobileOpenAuthBtn.style.display = 'none';
+    } else {
+      mobileUserInfo.style.display = 'none';
+      mobileAccountBtn.style.display = 'none';
+      mobileOpenAuthBtn.style.display = 'inline-block';
+    }
+  }
+
+
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showMessage('Signed in', 'Account');
+        bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
+      } catch (err) {
+        showMessage(err.message || 'Login failed');
+      }
+    });
+  }
+
+  if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('registerEmail').value.trim();
+      const password = document.getElementById('registerPassword').value;
+      const confirm = document.getElementById('registerConfirmPassword')?.value;
+
+      if (!password || password.length < 6) {
+        showMessage('Password must be at least 6 characters.');
+        return;
+      }
+      if (password !== confirm) {
+        showMessage('Passwords do not match.');
+        return;
+      }
+
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        showMessage('Account created', 'Account');
+        bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
+      } catch (err) {
+        showMessage(err.message || 'Registration failed');
+      }
+    });
+  }
+
+  if (googleSignInBtn) {
+    googleSignInBtn.addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+        showMessage('Signed in with Google', 'Account');
+        bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
+      } catch (err) {
+        // fallback to redirect for environments that block popups
+        if (err.code && (err.code === 'auth/operation-not-supported-in-this-environment' || err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user')) {
+          try {
+            await signInWithRedirect(auth, provider);
+            return;
+          } catch (err2) {
+            showMessage(err2.message || 'Google sign-in failed');
+            return;
+          }
+        }
+        showMessage(err.message || 'Google sign-in failed');
+      }
+    });
+  }
+});
 
 // Tab Switching
 const navCalculator = document.getElementById('navCalculator');
@@ -35,17 +340,21 @@ async function renderHistory() {
 
   const accordion = document.getElementById('historyAccordion');
 
-  const { data, error } = await supabase
-    .from('history')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(20);
+  const user = auth.currentUser;
+  if (!user) {
+    accordion.innerHTML = `<div class="p-3 text-muted">${t.loadingRecords}</div>`;
+    accordion.insertAdjacentHTML('beforeend', `<p class="text-center mt-3 small text-muted">${t.signInToSave || 'Please sign in to view your history.'}</p>`);
+    return;
+  }
 
-  if (error) {
+  let data = [];
+  try {
+    data = await fetchUserHistory(user, 20);
+  } catch (err) {
     historySection.innerHTML = `
       <div class="container py-4">
         <h4><i class="bi bi-clock-history"></i> ${t.history}</h4>
-        <p class="text-danger">Error loading history: ${error.message}</p>
+        <p class="text-danger">Error loading history: ${err.message || err}</p>
       </div>`;
     return;
   }
@@ -64,7 +373,7 @@ async function renderHistory() {
   data.forEach((record, index) => {
     const headerId = `heading${index}`;
     const collapseId = `collapse${index}`;
-    const dateStr = new Date(record.created_at).toLocaleString();
+    const dateStr = record.createdAt && record.createdAt.toDate ? new Date(record.createdAt.toDate()).toLocaleString() : new Date().toLocaleString();
 
     accordion.insertAdjacentHTML('beforeend', `
       <div class="accordion-item">
@@ -115,11 +424,10 @@ async function renderHistory() {
       const confirmed = await showConfirm(t.delete + " record?");
       if (confirmed) {
         try {
-          const { error } = await supabase.from('history').delete().eq('id', id);
-          if (error) throw error;
+          await deleteHistoryById(id);
           btn.closest('.accordion-item').remove();
         } catch (err) {
-          showMessage(t.delete + " failed: " + err.message);
+          showMessage(t.delete + " failed: " + (err.message || err));
         }
       }
     });
@@ -188,6 +496,20 @@ function applyTranslations() {
   // Buttons
   document.getElementById('btnCalculate').innerHTML = `<i class="bi"></i> ${t.calculate}`;
   document.getElementById('btnFillPrevious').innerHTML = `<i class="bi"></i> ${t.fillPrevious}`;
+  const saveLabelEl = document.getElementById('saveToAccountLabel');
+  if (saveLabelEl) saveLabelEl.textContent = t.saveToAccount || 'Save result to account';
+
+  // Side-menu / mobile labels
+  const mobileCalc = document.getElementById('mobileNavCalculator');
+  const mobileHist = document.getElementById('mobileNavHistory');
+  const sideMenuLabel = document.getElementById('sideMenuLabel');
+  const mobileOpenAuthBtn = document.getElementById('mobileOpenAuthBtn');
+  const mobileAccountBtn = document.getElementById('mobileAccountBtn');
+  if (mobileCalc) mobileCalc.textContent = t.calculator || 'Calculator';
+  if (mobileHist) mobileHist.textContent = t.history || 'History';
+  if (sideMenuLabel) sideMenuLabel.textContent = t.calculator || 'Menu';
+  if (mobileOpenAuthBtn) mobileOpenAuthBtn.textContent = t.calculator ? 'Sign in / Register' : 'Sign in / Register';
+  if (mobileAccountBtn) mobileAccountBtn.textContent = 'Account';
 
   // Results section titles and labels
   document.getElementById('resultsTitle').innerHTML = `<i class="bi me-1"></i> ${t.results}`;
@@ -231,33 +553,28 @@ document.getElementById('themeToggle').addEventListener('change', function () {
 
 document.getElementById('fillPreviousBtn').addEventListener('click', async () => {
   try {
-    // Fetch the latest record (most recent) from history
-    const { data, error } = await supabase
-      .from('history')
-      .select('person1_number, person2_number, shared_number')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      showMessage('Failed to fetch previous record: ' + error.message);
+    const user = auth.currentUser;
+    if (!user) {
+      showMessage(translations[currentLang].signInToSave || 'Please sign in to use previous data');
       return;
     }
-    if (!data) {
-      showMessage('No previous records found in the database.');
+
+    const prev = await getPreviousForUser(user);
+    if (!prev) {
+      showMessage(translations[currentLang].noRecords || 'No previous records found.');
       return;
     }
 
     // Fill the previous month inputs with fetched values
-    document.getElementById('previousPerson1Bill').value = data.person1_number ?? '';
-    document.getElementById('previousPerson2Bill').value = data.person2_number ?? '';
-    document.getElementById('previousSharedBill').value = data.shared_number ?? '';
+    document.getElementById('previousPerson1Bill').value = prev.person1_number ?? '';
+    document.getElementById('previousPerson2Bill').value = prev.person2_number ?? '';
+    document.getElementById('previousSharedBill').value = prev.shared_number ?? '';
   } catch (err) {
-    showMessage('Error fetching previous record: ' + err.message);
+    showMessage('Error fetching previous record: ' + (err.message || err));
   }
 });
 
-// Calculate button handler with Supabase save
+// Calculate button handler
 document.getElementById('calculateBtn').addEventListener('click', async function () {
   const p1 = parseFloat(document.getElementById('person1Bill').value);
   const p2 = parseFloat(document.getElementById('person2Bill').value);
@@ -317,25 +634,41 @@ document.getElementById('calculateBtn').addEventListener('click', async function
 
   document.getElementById('results').style.display = 'block';
 
-  // Save to Supabase (async)
-  try {
-    const { error } = await supabase.from('history').insert([
-      {
-        person1_number: p1,
-        person2_number: p2,
-        shared_number: shared,
-        previous_person1_number: p1Prev,
-        previous_person2_number: p2Prev,
-        previous_shared_number: sharedPrev,
-        total_bill: total,
-        result_person1: resultP1,
-        result_person2: resultP2,
-        result_total: resultTotal
+  // Optionally save to user's Firestore (if checkbox checked)
+  const saveChecked = document.getElementById('saveToAccount')?.checked;
+  if (saveChecked) {
+    const user = auth.currentUser;
+    if (!user) {
+      showMessage(translations[currentLang].signInToSave || 'Please sign in to save results');
+    } else {
+      try {
+        await saveHistoryForUser(user, {
+          person1_number: p1,
+          person2_number: p2,
+          shared_number: shared,
+          previous_person1_number: p1Prev,
+          previous_person2_number: p2Prev,
+          previous_shared_number: sharedPrev,
+          total_bill: total,
+          result_person1: resultP1,
+          result_person2: resultP2,
+          result_total: resultTotal
+        });
+        // update "previous" snapshot for this user
+        await updatePreviousForUser(user, {
+          person1_number: p1,
+          person2_number: p2,
+          shared_number: shared
+        });
+      } catch (err) {
+        const msg = (err && err.message) ? err.message : String(err);
+        if (/permission|missing or insufficient permissions|permission-denied/i.test(msg)) {
+          showMessage('Failed to save history: permission denied. Check Firestore rules (see README) and ensure Firestore exists in asia-southeast1.\n' + msg);
+        } else {
+          showMessage('Failed to save history: ' + msg);
+        }
       }
-    ]);
-    if (error) throw error;
-  } catch (err) {
-    showMessage('Failed to save history: ' + err.message);
+    }
   }
 });
 
