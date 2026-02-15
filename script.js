@@ -132,13 +132,47 @@ function updateAuthUI(user) {
   if (user) {
     openAuthBtn.style.display = 'none';
     userBtn.style.display = 'flex';
-    userEmailSpan.textContent = user.email || user.displayName || '';
+    userEmailSpan.textContent = (user.displayName && user.displayName.trim()) ? user.displayName : (user.email || '');
     userPhotoImg.src = user.photoURL || 'https://via.placeholder.com/28?text=U';
   } else {
     openAuthBtn.style.display = 'inline-block';
     userBtn.style.display = 'none';
     userEmailSpan.textContent = '';
     userPhotoImg.src = 'https://via.placeholder.com/28?text=U';
+  }
+}
+
+// Update mobile/offcanvas user UI (global so onAuthStateChanged can call it)
+function updateMobileUser(user) {
+  const mobileUserInfo = document.getElementById('mobileUserInfo');
+  const mobileUserPhoto = document.getElementById('mobileUserPhoto');
+  const mobileUserName = document.getElementById('mobileUserName');
+  const mobileUserEmail = document.getElementById('mobileUserEmail');
+  const mobileAccountBtn = document.getElementById('mobileAccountBtn');
+  const mobileOpenAuthBtn = document.getElementById('mobileOpenAuthBtn');
+  const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+
+  if (!mobileUserInfo) return;
+
+  if (user) {
+    mobileUserInfo.style.display = 'flex';
+    if (mobileUserPhoto) mobileUserPhoto.src = user.photoURL || 'https://via.placeholder.com/40?text=U';
+    if (mobileUserName) mobileUserName.textContent = (user.displayName && user.displayName.trim()) ? user.displayName : (user.email ? user.email.split('@')[0] : '');
+    if (mobileUserEmail) mobileUserEmail.textContent = user.email || '';    if (mobileAccountBtn) mobileAccountBtn.style.display = 'inline-block';
+    if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'inline-block';
+    if (mobileOpenAuthBtn) mobileOpenAuthBtn.style.display = 'none';
+
+    // ensure desktop account button shows a small avatar/text if available
+    const userBtn = document.getElementById('userBtn');
+    if (userBtn) userBtn.style.display = (user.email || user.displayName || user.photoURL) ? 'flex' : 'none';
+  } else {
+    mobileUserInfo.style.display = 'none';
+    if (mobileAccountBtn) mobileAccountBtn.style.display = 'none';
+    if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'none';
+    if (mobileOpenAuthBtn) mobileOpenAuthBtn.style.display = 'inline-block';
+
+    const userBtn = document.getElementById('userBtn');
+    if (userBtn) userBtn.style.display = 'none';
   }
 }
 
@@ -203,47 +237,51 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Mobile / side-menu bindings
   const mobileOpenAuthBtn = document.getElementById('mobileOpenAuthBtn');
+  const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
   const mobileAccountBtn = document.getElementById('mobileAccountBtn');
   const mobileUserInfo = document.getElementById('mobileUserInfo');
   const mobileUserPhoto = document.getElementById('mobileUserPhoto');
   const mobileUserName = document.getElementById('mobileUserName');
   const mobileUserEmail = document.getElementById('mobileUserEmail');
 
+  // also ensure the offcanvas close button explicitly hides (handles cases where data-bs-dismiss may be ignored)
+  const offcanvasCloseBtn = document.querySelector('#sideMenu .btn-close');
+  if (offcanvasCloseBtn) offcanvasCloseBtn.addEventListener('click', hideSideMenu);
+
   if (mobileOpenAuthBtn) {
     mobileOpenAuthBtn.addEventListener('click', () => {
-      new bootstrap.Offcanvas(document.getElementById('sideMenu')).hide();
+      hideSideMenu();
       new bootstrap.Modal(document.getElementById('authModal')).show();
     });
   }
   if (mobileAccountBtn) {
     mobileAccountBtn.addEventListener('click', () => {
-      new bootstrap.Offcanvas(document.getElementById('sideMenu')).hide();
+      hideSideMenu();
       new bootstrap.Modal(document.getElementById('accountModal')).show();
+    });
+  }
+  if (mobileLogoutBtn) {
+    mobileLogoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        hideSideMenu();
+        showMessage('Signed out', 'Account');
+      } catch (err) {
+        showMessage(err.message || 'Sign-out failed');
+      }
     });
   }
 
   // mobile nav buttons
   const mNavCalc = document.getElementById('mobileNavCalculator');
   const mNavHist = document.getElementById('mobileNavHistory');
-  if (mNavCalc) mNavCalc.addEventListener('click', () => { new bootstrap.Offcanvas(document.getElementById('sideMenu')).hide(); navCalculator.click(); });
-  if (mNavHist) mNavHist.addEventListener('click', () => { new bootstrap.Offcanvas(document.getElementById('sideMenu')).hide(); navHistory.click(); });
+  if (mNavCalc) mNavCalc.addEventListener('click', () => { hideSideMenu(); navCalculator.click(); });
+  if (mNavHist) mNavHist.addEventListener('click', () => { hideSideMenu(); navHistory.click(); });
 
-  // update mobile user area when auth changes
-  function updateMobileUser(user) {
-    if (!mobileUserInfo) return;
-    if (user) {
-      mobileUserInfo.style.display = 'flex';
-      mobileUserPhoto.src = user.photoURL || 'https://via.placeholder.com/40?text=U';
-      mobileUserName.textContent = user.displayName || user.email || '';
-      mobileUserEmail.textContent = user.email || '';
-      mobileAccountBtn.style.display = 'inline-block';
-      mobileOpenAuthBtn.style.display = 'none';
-    } else {
-      mobileUserInfo.style.display = 'none';
-      mobileAccountBtn.style.display = 'none';
-      mobileOpenAuthBtn.style.display = 'inline-block';
-    }
-  }
+  // sync mobile auth UI immediately after DOM ready (covers redirect sign-in flows)
+  try { updateAuthUI(auth.currentUser); } catch (e) { /* ignore */ }
+  try { updateMobileUser(auth.currentUser); } catch (e) { /* ignore */ }
+
 
 
   if (loginForm) {
@@ -435,6 +473,9 @@ async function renderHistory() {
 }
 
 navHistory.addEventListener('click', async () => {
+  // close side menu on tab switch (mobile UX)
+  hideSideMenu();
+
   navHistory.classList.add('active');
   navCalculator.classList.remove('active');
   calculatorSection.style.display = 'none';
@@ -542,6 +583,10 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('themeToggle').checked = isDark;
 
   applyTranslations();
+
+  // defensive: ensure auth UI and mobile UI reflect current auth state immediately
+  try { updateAuthUI(auth.currentUser); } catch (e) { /* ignore */ }
+  try { updateMobileUser && updateMobileUser(auth.currentUser); } catch (e) { /* ignore */ }
 });
 
 // Theme Toggle Handler
@@ -672,7 +717,27 @@ document.getElementById('calculateBtn').addEventListener('click', async function
   }
 });
 
+// helper: hide the mobile side menu if it's open
+function hideSideMenu() {
+  const side = document.getElementById('sideMenu');
+  if (!side) return;
+  // Bootstrap adds 'show' when visible; hide via the active Offcanvas instance if present
+  try {
+    const inst = bootstrap.Offcanvas.getInstance(side);
+    if (inst) { inst.hide(); return; }
+    // fallback: call hide on a new instance (safe)
+    new bootstrap.Offcanvas(side).hide();
+  } catch (e) {
+    // last-resort: toggle class so backdrop can be removed
+    side.classList.remove('show');
+    document.body.classList.remove('offcanvas-backdrop');
+  }
+}
+
 navCalculator.addEventListener('click', () => {
+  // close side menu on tab switch (mobile UX)
+  hideSideMenu();
+
   navCalculator.classList.add('active');
   navHistory.classList.remove('active');
   calculatorSection.style.display = 'block';
