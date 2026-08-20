@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    line-height: 1.8;
+    background-attachment: fixed;
+  }
+
+  /* Remove spin buttons from number inputs */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer components {
+  /* Glassmorphic Card */
+  .glass-panel {
+    @apply backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border border-white/60 dark:border-slate-800/80 shadow-glass dark:shadow-glass-dark transition-all duration-300;
+  }
+
+  .glass-panel:hover {
+    @apply shadow-glass-hover;
+  }
+
+  /* Glassmorphic Pill / Badge */
+  .glass-pill {
+    @apply backdrop-blur-md bg-white/70 dark:bg-slate-800/70 border border-white/40 dark:border-slate-700/60 shadow-sm;
+  }
+
+  /* Neumorphic Input Field */
+  .neumorph-input {
+    @apply bg-slate-50/70 dark:bg-slate-950/60 border-2 border-slate-200/80 dark:border-slate-800 rounded-2xl transition-all duration-200;
+  }
+
+  .neumorph-input:focus {
+    @apply bg-white dark:bg-slate-900 border-blue-500 shadow-glow-blue outline-none;
+  }
+}
+
+/* Ambient Background Orbs */
+.ambient-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.orb-1 {
+  position: absolute;
+  top: -100px;
+  right: -50px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+.orb-2 {
+  position: absolute;
+  top: 40%;
+  left: -100px;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  filter: blur(50px);
+}
+
+.dark .orb-1 {
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+.dark .orb-2 {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
