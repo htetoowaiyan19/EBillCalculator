@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Globe, Sun, Moon, Calculator, History, CloudDownload, LogIn } from 'lucide-react';
+import { Zap, Globe, Sun, Moon, Calculator, History, CloudDownload, LogIn, Home } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { ActiveTab, Language, Theme } from '../types';
 import { translations } from '../constants/translations';
@@ -14,6 +14,7 @@ interface HeaderProps {
   onTabChange: (tab: ActiveTab) => void;
   onOpenAuth: () => void;
   onOpenAccount: () => void;
+  onSwitchToHousePlan?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
   onTabChange,
   onOpenAuth,
   onOpenAccount,
+  onSwitchToHousePlan,
 }) => {
   const t = translations[lang];
 
@@ -53,6 +55,19 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Quick Switch to House Plan */}
+            {onSwitchToHousePlan && (
+              <button
+                type="button"
+                onClick={onSwitchToHousePlan}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800 shadow-sm hover:shadow-md hover:bg-amber-100 dark:hover:bg-amber-900/60 active:scale-95 transition-all duration-200"
+                title={t.switchToHousePlanTooltip}
+              >
+                <Home className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <span className="hidden md:inline">{t.switchToHousePlan}</span>
+              </button>
+            )}
+
             {/* Language Pill Switch */}
             <button
               onClick={onToggleLang}

@@ -91,6 +91,11 @@ export interface TranslationSchema {
   restoreSuccess: string;
   restoreInvalid: string;
   lblRestoreFile: string;
+  clearEbillStorageTitle: string;
+  clearEbillStorageDesc: string;
+  clearEbillStorageBtn: string;
+  confirmClearEbillStorage: string;
+  clearEbillStorageSuccess: string;
 
   // Cloud & Auth
   signIn: string;
@@ -120,6 +125,10 @@ export interface TranslationSchema {
   unitWord: string;
   personWord: string;
   monthNames: string[];
+  switchToHousePlan: string;
+  switchToEbill: string;
+  switchToHousePlanTooltip: string;
+  switchToEbillTooltip: string;
 }
 
 export const translations: Record<'MY' | 'EN', TranslationSchema> = {
@@ -149,7 +158,7 @@ export const translations: Record<'MY' | 'EN', TranslationSchema> = {
     step3Title: "၃။ စုစုပေါင်း ကျသင့်ငွေ",
     totalBillLabel: "လျှပ်စစ်မီတာခ စုစုပေါင်း (ကျပ်)",
     sharedUsersLabel: "ရေစက်/ဘုံမီတာ မျှဝေသုံးသူ အရေအတွက်",
-    sharedUsersHelp: "(မူလသတ်မှတ်ချက်: ၃ ဦး)",
+    sharedUsersHelp: "မျှဝေသုံးစွဲသူ ဦးရေကို ထည့်သွင်းပါ",
     
     calculate: "တွက်ချက်မည်",
     clear: "အသစ်ပြန်စမည်",
@@ -205,6 +214,11 @@ export const translations: Record<'MY' | 'EN', TranslationSchema> = {
     restoreSuccess: "မှတ်တမ်းများ အောင်မြင်စွာ ပြန်လည်ထည့်သွင်းပြီးပါပြီ",
     restoreInvalid: "ရွေးချယ်ထားသော ဖိုင် မှားယွင်းနေပါသည်",
     lblRestoreFile: "ဖိုင်မှ ပြန်လည်ထည့်သွင်းရန်",
+    clearEbillStorageTitle: "ဖုန်းတွင်း သိမ်းဆည်းထားသော အချက်အလက်များ ဖျက်မည်",
+    clearEbillStorageDesc: "ဖုန်းတွင်း (Local Storage) သိမ်းထားသော အမည်များ၊ ယခင်လဖတ်ချက်များနှင့် မှတ်တမ်းဟောင်းများကို ရှင်းလင်းဖျက်ထုတ်ပါမည်။",
+    clearEbillStorageBtn: "အချက်အလက်များ ဖျက်ထုတ်မည် (Clear Storage)",
+    confirmClearEbillStorage: "ဖုန်းတွင်းရှိ မီတာခ အချက်အလက်များနှင့် မှတ်တမ်းအားလုံးကို ရှင်းလင်းဖျက်ထုတ်ရန် သေချာပါသလား?",
+    clearEbillStorageSuccess: "ဖုန်းတွင်း အချက်အလက်များကို အောင်မြင်စွာ ရှင်းထုတ်ပြီးပါပြီ",
 
     // Cloud & Auth
     signIn: "အကောင့်ဝင်ရန်",
@@ -232,7 +246,11 @@ export const translations: Record<'MY' | 'EN', TranslationSchema> = {
     currency: "ကျပ်",
     unitWord: "ယူနစ်",
     personWord: "ဦး",
-    monthNames: ["ဇန်နဝါရီ", "ဖေဖော်ဝါရီ", "မတ်", "ဧပြီ", "မေ", "ဇွန်", "ဇူလိုင်", "သြဂုတ်", "စက်တင်ဘာ", "အောက်တိုဘာ", "နိုဝင်ဘာ", "ဒီဇင်ဘာ"]
+    monthNames: ["ဇန်နဝါရီ", "ဖေဖော်ဝါရီ", "မတ်", "ဧပြီ", "မေ", "ဇွန်", "ဇူလိုင်", "သြဂုတ်", "စက်တင်ဘာ", "အောက်တိုဘာ", "နိုဝင်ဘာ", "ဒီဇင်ဘာ"],
+    switchToHousePlan: "အိမ်ဆောက် အစီအစဉ်",
+    switchToEbill: "မီတာခ တွက်စက်",
+    switchToHousePlanTooltip: "အိမ်ဆောက် ဘတ်ဂျက် စီမံခန့်ခွဲမှုသို့ သွားမည်",
+    switchToEbillTooltip: "မီတာခ ခွဲဝေတွက်ချက်စက်သို့ သွားမည်"
   },
 
   EN: {
@@ -261,7 +279,7 @@ export const translations: Record<'MY' | 'EN', TranslationSchema> = {
     step3Title: "3. Total Bill Amount",
     totalBillLabel: "Total Electricity Bill (MMK)",
     sharedUsersLabel: "Number of Shared Meter Users",
-    sharedUsersHelp: "(Default: 3 users)",
+    sharedUsersHelp: "Enter number of shared users",
     
     calculate: "Calculate Bill",
     clear: "Reset / Clear All",
@@ -317,6 +335,11 @@ export const translations: Record<'MY' | 'EN', TranslationSchema> = {
     restoreSuccess: "Records restored successfully",
     restoreInvalid: "Invalid backup file selected",
     lblRestoreFile: "Select Backup File",
+    clearEbillStorageTitle: "Clear Local Storage Data",
+    clearEbillStorageDesc: "Permanently clear all local storage cached data including saved names, previous readings, and history.",
+    clearEbillStorageBtn: "Clear Local Storage",
+    confirmClearEbillStorage: "Are you sure you want to clear all local storage records and cached data?",
+    clearEbillStorageSuccess: "Local storage data cleared successfully",
 
     // Cloud & Auth
     signIn: "Sign in",
@@ -344,6 +367,10 @@ export const translations: Record<'MY' | 'EN', TranslationSchema> = {
     currency: "MMK",
     unitWord: "Units",
     personWord: "Users",
-    monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    switchToHousePlan: "House Plan",
+    switchToEbill: "E-Bill Splitter",
+    switchToHousePlanTooltip: "Switch to House Plan Budget Manager",
+    switchToEbillTooltip: "Switch to Electricity Bill Splitter"
   }
 };

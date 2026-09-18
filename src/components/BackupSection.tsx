@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Download, Upload, ShieldCheck } from 'lucide-react';
+import { Download, Upload, ShieldCheck, Trash2 } from 'lucide-react';
 import { Language } from '../types';
 import { translations } from '../constants/translations';
 
@@ -7,12 +7,14 @@ interface BackupSectionProps {
   lang: Language;
   onDownloadBackup: () => void;
   onRestoreBackup: (file: File) => void;
+  onClearLocalStorage?: () => void;
 }
 
 export const BackupSection: React.FC<BackupSectionProps> = ({
   lang,
   onDownloadBackup,
   onRestoreBackup,
+  onClearLocalStorage,
 }) => {
   const t = translations[lang];
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,6 +85,32 @@ export const BackupSection: React.FC<BackupSectionProps> = ({
             <span>{t.btnRestoreBackup}</span>
           </button>
         </div>
+
+        {/* Clear Local Storage Section */}
+        {onClearLocalStorage && (
+          <div className="pt-2">
+            <div className="p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/40 space-y-2.5">
+              <div>
+                <h3 className="text-xs font-black text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
+                  <Trash2 className="w-3.5 h-3.5" />
+                  {t.clearEbillStorageTitle}
+                </h3>
+                <p className="text-[11px] text-rose-600/80 dark:text-rose-400/80 mt-1 leading-relaxed">
+                  {t.clearEbillStorageDesc}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={onClearLocalStorage}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-black text-xs text-white bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 active:scale-[0.98] shadow-md shadow-rose-500/20 transition"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{t.clearEbillStorageBtn}</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

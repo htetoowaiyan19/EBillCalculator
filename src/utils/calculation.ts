@@ -24,9 +24,18 @@ export function calculateBill(
   const sharedP = parseFloat(inputs.sharedPrev);
 
   const totalBill = parseFloat(inputs.totalBill);
-  const sharedUsers = parseInt(inputs.sharedUsers, 10) || 3;
+  const sharedUsers = parseInt(inputs.sharedUsers, 10);
 
-  if (isNaN(p1) || isNaN(p2) || isNaN(shared) || isNaN(p1P) || isNaN(p2P) || isNaN(sharedP)) {
+  if (
+    isNaN(p1) ||
+    isNaN(p2) ||
+    isNaN(shared) ||
+    isNaN(p1P) ||
+    isNaN(p2P) ||
+    isNaN(sharedP) ||
+    isNaN(sharedUsers) ||
+    sharedUsers <= 0
+  ) {
     return { success: false, errorKey: 'errFillAll' };
   }
 

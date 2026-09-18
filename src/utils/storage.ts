@@ -125,3 +125,15 @@ export function importBackupJson(jsonStr: string): { success: true; data: Backup
     return { success: false, error: (err as Error).message || 'Failed to parse JSON' };
   }
 }
+
+export function clearEBillLocalStorage(): void {
+  try {
+    localStorage.removeItem(KEYS.NAMES);
+    localStorage.removeItem(KEYS.PREVIOUS);
+    localStorage.removeItem(KEYS.HISTORY);
+    localStorage.removeItem('ebill_autosave');
+  } catch (err) {
+    console.warn('Failed to clear EBill local storage:', err);
+  }
+}
+
