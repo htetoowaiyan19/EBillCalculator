@@ -20,7 +20,7 @@ interface VersionUpdateModalProps {
   onToggleLang?: () => void;
 }
 
-export const CURRENT_VERSION = 'v1.4.0';
+export const CURRENT_VERSION = 'v1.4.1';
 
 export const VersionUpdateModal: React.FC<VersionUpdateModalProps> = ({
   isOpen,
@@ -29,6 +29,24 @@ export const VersionUpdateModal: React.FC<VersionUpdateModalProps> = ({
   onToggleLang,
 }) => {
   const patchNotes = [
+    {
+      icon: <Globe className="w-5 h-5 text-emerald-500" />,
+      bg: 'bg-emerald-500/10 border-emerald-200 dark:border-emerald-800/80',
+      title: lang === 'MY' ? '🌐 Vercel SPA Routing & Refresh Fix' : '🌐 Vercel SPA Routing & Direct Link Support',
+      desc:
+        lang === 'MY'
+          ? 'Vercel ပေါ်တွင် တင်ထားစဉ် /houseplan နှင့် /ebillcalculator စာမျက်နှာများကို Refresh ပြုလုပ်ရာတွင် 404 Error မတက်စေရန် vercel.json rewrite config ထည့်သွင်းပေးထားခြင်း။'
+          : 'Added vercel.json SPA rewrites ensuring direct navigation and page reloads on /houseplan and /ebillcalculator routes work seamlessly without 404 errors.',
+    },
+    {
+      icon: <Sparkles className="w-5 h-5 text-blue-500" />,
+      bg: 'bg-blue-500/10 border-blue-200 dark:border-blue-800/80',
+      title: lang === 'MY' ? '🔑 Register Modal တွင် Google ဖြင့် အကောင့်ဖွင့်နိုင်ခြင်း' : '🔑 1-Tap Google Sign-Up in Register Modal',
+      desc:
+        lang === 'MY'
+          ? 'အကောင့်အသစ်ဖွင့် (Register) မော်ဒယ်တွင် Google ဖြင့် 1-tap အလွယ်တကူ အကောင့်ဖွင့်နိုင်မည့် ခလုတ်အသစ် ထည့်သွင်းပေးထားခြင်း။'
+          : 'Added 1-tap Google sign-up button inside the registration form for instant, hassle-free account creation.',
+    },
     {
       icon: <Home className="w-5 h-5 text-amber-500" />,
       bg: 'bg-amber-500/10 border-amber-200 dark:border-amber-800/80',
@@ -109,7 +127,7 @@ export const VersionUpdateModal: React.FC<VersionUpdateModalProps> = ({
                     <span>{CURRENT_VERSION} Update</span>
                   </div>
                   <h3 className="text-lg sm:text-xl font-black tracking-tight">
-                    {lang === 'MY' ? 'ဗားရှင်း ၁.၄.၀ အသစ်ထွက်ရှိမှု မှတ်စုများ' : "What's New in Version 1.4.0"}
+                    {lang === 'MY' ? 'ဗားရှင်း ၁.၄.၁ အသစ်ထွက်ရှိမှု မှတ်စုများ' : "What's New in Version 1.4.1"}
                   </h3>
                   <p className="text-xs text-blue-100 font-medium">
                     {lang === 'MY'

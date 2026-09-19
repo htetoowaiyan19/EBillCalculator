@@ -110,6 +110,7 @@ export interface TranslationSchema {
   signedOutSuccess: string;
   registeredSuccess: string;
   googleSignIn: string;
+  googleRegister: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -233,6 +234,7 @@ export const translations: Record<'MY' | 'EN', TranslationSchema> = {
     signedOutSuccess: "အကောင့်မှ ထွက်ပြီးပါပြီ",
     registeredSuccess: "အကောင့်အသစ် ဖွင့်ပြီးပါပြီ",
     googleSignIn: "Google ဖြင့် ဝင်မည်",
+    googleRegister: "Google ဖြင့် အကောင့်ဖွင့်မည်",
     email: "အီးမေးလ်",
     password: "လျှို့ဝှက်နံပါတ်",
     confirmPassword: "လျှို့ဝှက်နံပါတ် အတည်ပြုပါ",
@@ -354,6 +356,7 @@ export const translations: Record<'MY' | 'EN', TranslationSchema> = {
     signedOutSuccess: "Signed out successfully",
     registeredSuccess: "Account created successfully",
     googleSignIn: "Sign in with Google",
+    googleRegister: "Sign up with Google",
     email: "Email",
     password: "Password",
     confirmPassword: "Confirm Password",
